@@ -13,8 +13,8 @@ class RecipeForm(forms.ModelForm):
     cooking_time = forms.CharField(
         validators=[
             RegexValidator(
-                regex=r'^([0-1]?\d|2[0-3]):([0-5]?\d):([0-5]?\d)$',  # Новый regex
-                message='Формат времени: HH:MM:SS (макс 23:59:59)'
+                regex=r'^([0-1]?\d|2[0-3]):([0-5]?\d):([0-5]?\d)$',  
+                message='Time format: HH:MM:SS (max 23:59:59)'
             )
         ]
     )
@@ -34,19 +34,19 @@ IngredientFormSet = inlineformset_factory(
     extra=2,
     can_delete=False,
     widgets={
-        'name': forms.TextInput(attrs={'placeholder': 'Мука'}),
-        'quantity': forms.NumberInput(attrs={'step': '0.01'}),
+        'name': forms.TextInput(attrs={'placeholder': 'e. g. Flour'}),
+        'quantity': forms.NumberInput(attrs={'step': '0.01', 'placeholder': 'e. g. 100'}),
     }
 )
 
 InstructionFormSet = inlineformset_factory(
     Recipe,
     Instruction,
-    fields=('instruction_text',),  # Убираем step_number из полей
+    fields=('instruction_text',),  
     extra=3,
     can_delete=False,
     widgets={
-        'instruction_text': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Детальные инструкции...'}),
+        'instruction_text': forms.Textarea(attrs={'rows': 3, 'placeholder': 'e. g. Mix the ingredients...'}),
     }
 )
 

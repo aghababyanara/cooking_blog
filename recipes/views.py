@@ -19,7 +19,7 @@ from django.db import IntegrityError
 from .forms import RecipeForm, IngredientFormSet, InstructionFormSet
 
 class HomeView(View):
-    def get(self, request):  # Убрали параметр slug
+    def get(self, request):  
         categories = Category.objects.annotate(
             recipe_count=Count('recipes')
         ).prefetch_related(
@@ -141,17 +141,14 @@ class RecipeCreateView(LoginRequiredMixin, CreateView):
         try:
             with transaction.atomic():
                 self.object = form.save(commit=False)
-                self.object.author = self.request.user  # обязательно до save()
+                self.object.author = self.request.user  
                 self.object.save()
 
-                # Привязываем рецепт к формсетам
                 ingredient_formset.instance = self.object
                 instruction_formset.instance = self.object
 
-                # Сохраняем ингредиенты
                 ingredient_formset.save()
 
-                # Сохраняем инструкции с автонумерацией
                 instructions = instruction_formset.save(commit=False)
                 for i, instruction in enumerate(instructions):
                     instruction.step_number = i + 1

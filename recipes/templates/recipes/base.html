@@ -8,6 +8,7 @@
     <title>{% block title %}Cooking Blog{% endblock %}</title>
     
     <!-- Styles -->
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -166,39 +167,9 @@
     </footer>
 
     {% block scripts %}
-    <script>
-document.body.addEventListener('htmx:afterSwap', function(evt) {
-    if (evt.detail.target.id === 'favorite-section') {
-        const heartIcon = document.querySelector('#favorite-section .fa-heart');
-        if (heartIcon) {
-            heartIcon.classList.add('heart-animation');
-            setTimeout(() => heartIcon.classList.remove('heart-animation'), 500);
-        }
-    }
-});
-</script>
 
-<style>
-.heart-animation {
-    animation: heartBeat 0.5s ease;
-}
-
-@keyframes heartBeat {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1); }
-}
-</style>
     {% endblock %}
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-
-    <script>
-        // Toggle mobile menu visibility
-        document.getElementById('menu-toggle').addEventListener('click', function() {
-            const menu = document.getElementById('mobile-menu');
-            menu.classList.toggle('hidden');
-        });
-    </script>
-
+    <script src="{% static 'js/base.js' %}"></script>
 </body>
 </html>

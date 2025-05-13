@@ -1,6 +1,10 @@
 {% extends "recipes/base.html" %}
 {% load static %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/user_reviews.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="max-w-4xl mx-auto px-4 py-8">
     <header class="mb-8">
@@ -82,17 +86,3 @@
 </div>
 
 {% endblock %}
-
-
-<style>
-    .culinary-action-btn {
-     @apply p-2 rounded-full bg-orange-50 hover:bg-orange-100 transition-colors;
-    }
-    .animate-pulse {
-     animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    }
-    @keyframes pulse {
-     0%, 100% { transform: scale(1); }
-     50% { transform: scale(1.15); }
-    }
-</style>

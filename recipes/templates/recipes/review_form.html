@@ -1,0 +1,33 @@
+<!-- recipes/review_form.html -->
+{% extends "recipes/base.html" %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-8">
+    <div class="bg-white rounded-xl shadow-lg p-6">
+        <h2 class="text-2xl font-bold text-orange-800 mb-6">
+            {% if object %}Edit Comment{% else %}Add Comment{% endif %}
+        </h2>
+        
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="mb-6">
+                <label class="block text-orange-700 mb-2 text-sm font-medium">
+                    Your Comment
+                </label>
+                {{ form.comment }}
+                {{ form.comment.errors }}
+            </div>
+
+            <div class="flex items-center justify-between">
+                <button type="submit" class="btn-orange">
+                    {% if object %}Update{% else %}Submit{% endif %}
+                </button>
+                <a href="{{ recipe.get_absolute_url }}" class="text-orange-600 hover:text-orange-700">
+                    ← Back to Recipe
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,119 @@
+{% extends "recipes/base.html" %}
+{% load static %}
+
+{% block title %}{{ user_obj.username }} Profile - Cooking Blog{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="bg-white rounded-xl shadow-lg p-8">
+        <!-- Profile Header -->
+        <div class="flex flex-col md:flex-row items-center mb-8">
+            <div class="w-32 h-32 mb-4 md:mb-0 md:mr-8">
+                {% if user_obj.profile_picture and user_obj.profile_picture.url %}
+                    <img src="{{ user_obj.profile_picture.url }}" 
+                         alt="{{ user_obj.username }}" 
+                         class="w-full h-full rounded-full object-cover border-4 border-orange-200">
+                {% else %}
+                    <img src="{% static 'images/default-profile.png' %}" 
+                         alt="Default profile" 
+                         class="w-full h-full rounded-full object-cover border-4 border-orange-200">
+                {% endif %}
+            </div>
+            <div class="text-center md:text-left">
+                <h1 class="text-3xl font-bold text-orange-800 mb-2">
+                    {% if user_obj.get_full_name %}
+                        {{ user_obj.get_full_name }}
+                    {% else %}
+                        @{{ user_obj.username }}
+                    {% endif %}
+                </h1>
+                <p class="text-orange-600 mb-4">Member since {{ user_obj.date_joined|date:"F Y" }}</p>
+                <div class="flex items-center justify-center md:justify-start space-x-4">
+                    <div class="flex items-center text-orange-700">
+                        <i class="fas fa-utensils mr-2"></i>
+                        {{ user_obj.recipes.count }} recipe{{ user_obj.recipes.count|pluralize }}
+                    </div>
+                    <a href="{% url 'recipes:favorites_list' %}" class="flex items-center text-orange-700 hover:text-orange-800 transition-colors">
+                        <i class="fas fa-heart mr-2"></i>
+                        {{ user_obj.favorite_recipes.count }} favorites
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bio Section -->
+        {% if user_obj.bio %}
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-orange-800 mb-3">About Me</h2>
+            <p class="text-orange-700 leading-relaxed whitespace-pre-line">{{ user_obj.bio }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Action Buttons -->
+        {% if user == user_obj %}
+        <div class="flex space-x-4">
+            <a href="{% url 'recipes:recipe-create' %}" 
+                class="bg-orange-600 text-white px-6 py-2 rounded-lg hover:bg-orange-700 transition-colors flex items-center">
+                <i class="fas fa-plus mr-2"></i>Add Recipe
+            </a>
+            <a href="{% url 'users:profile_edit' %}" 
+            class="bg-orange-600 text-white px-6 py-2 rounded-lg hover:bg-orange-700 transition-colors">
+             <i class="fas fa-edit mr-2"></i>Edit Profile
+            </a>
+            <a href="{% url 'users:password_change' %}" 
+                class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition-colors">
+                <i class="fas fa-lock mr-2"></i>Change Password
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- User's Recipes -->
+    <div class="mt-12">
+        <h2 class="text-2xl font-bold text-orange-800 mb-6">
+            {% if user == user_obj %}My Recipes{% else %}{{ user_obj.username }}'s Recipes{% endif %}
+        </h2>
+        {% if user_obj.recipes.all %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for recipe in user_obj.recipes.all %}
+                    <div class="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow overflow-hidden">
+                        <a href="{% url 'recipes:recipe-detail' recipe.slug %}">
+                            <div class="aspect-video bg-orange-50">
+                                {% if recipe.image %}
+                                    <img src="{{ recipe.image.url }}" 
+                                         alt="{{ recipe.title }}" 
+                                         class="w-full h-full object-cover">
+                                {% else %}
+                                    <div class="w-full h-full flex items-center justify-center text-orange-200">
+                                        <i class="fas fa-camera fa-3x"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="p-4">
+                                <h3 class="font-semibold text-orange-800 line-clamp-2 mb-2">{{ recipe.title }}</h3>
+                                <div class="flex items-center justify-between text-sm text-orange-700">
+                                    <span><i class="fas fa-clock mr-1"></i>{{ recipe.cooking_time }}</span>
+                                    <span class="capitalize bg-orange-100 px-2 py-1 rounded">{{ recipe.difficulty }}</span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-8">
+                <p class="text-orange-600">
+                    {% if user == user_obj %}
+                        You haven't created any recipes yet.
+                        <a href="{% url 'recipes:recipe-create' %}" class="text-orange-800 hover:underline">
+                            Create your first recipe!
+                        </a>
+                    {% else %}
+                        This user hasn't created any recipes yet.
+                    {% endif %}
+                </p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

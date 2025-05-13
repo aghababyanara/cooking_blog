@@ -1,0 +1,98 @@
+{% extends "recipes/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <header class="mb-8">
+        <h1 class="text-3xl font-bold text-orange-800 flex items-center gap-3">
+            <span class="icon icon--reviews">📒</span>
+            My Flavor Journal
+        </h1>
+        <p class="text-orange-600 mt-2">Total reviews: {{ reviews.count }}</p>
+    </header>
+    
+    <div class="space-y-6">
+        {% for review in reviews %}
+        <article class="bg-white p-6 rounded-xl shadow-sm border border-orange-100 
+        hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+            <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center group">
+                <a href="{{ review.recipe.get_absolute_url }}" 
+                    class="text-orange-800 hover:text-orange-900 font-medium flex items-center gap-2">
+                    <span class="text-2xl transition-transform duration-300 group-hover:rotate-12">📘</span>
+                    <span class="border-b-2 border-transparent hover:border-orange-500 transition-all">
+                        {{ review.recipe.title }}
+                    </span>
+                </a>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <div class="rating-stars text-amber-500" 
+                    aria-label="Rating: {{ review.rating }} stars">
+                    {% for i in "12345" %}
+                    <span class="{% if i|add:0 <= review.rating %}text-amber-500 animate-pulse{% else %}text-gray-300{% endif %} 
+                            text-lg transition-all hover:scale-125">
+                        🧁
+                    </span>
+                    {% endfor %}
+                </div>
+                
+                <div class="flex gap-3">
+                    <a href="{% url 'recipes:review-edit' review.pk %}" 
+                        class="culinary-action-btn transform hover:scale-110"
+                        aria-label="Edit review">
+                        <span class="text-xl transition-all hover:rotate-45">🥄</span>
+                    </a>
+                    <a href="{% url 'recipes:review-delete' review.pk %}" 
+                        class="culinary-action-btn transform hover:scale-110"
+                        aria-label="Delete review">
+                        <span class="text-xl transition-all hover:rotate-90">🍴</span>
+                    </a>
+                </div>
+            </div>
+            </div>
+
+            {% if review.comment %}
+            <div class="prose max-w-none text-orange-700 mb-2 pl-2 border-l-4 border-orange-200 
+                    transition-all hover:border-orange-400">
+            {{ review.comment|linebreaks }}
+            </div>
+            {% endif %}
+
+            <div class="flex items-center gap-2 mt-3 text-sm text-orange-500">
+            <span class="text-lg">⏳</span>
+            <time datetime="{{ review.created_at|date:'c' }}">
+                {{ review.created_at|date:"d.m.Y H:i" }}
+            </time>
+            </div>
+            </article>
+
+
+        {% empty %}
+        <div class="text-center py-12 bg-orange-50 rounded-xl">
+            <p class="text-orange-600 mb-4">You haven't left any reviews yet</p>
+            <a href="{% url 'recipes:recipe-list' %}" 
+               class="btn-orange inline-flex items-center gap-2">
+                {% include 'icons/arrow-left.svg' %}
+                Back to recipes
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}
+
+
+<style>
+    .culinary-action-btn {
+     @apply p-2 rounded-full bg-orange-50 hover:bg-orange-100 transition-colors;
+    }
+    .animate-pulse {
+     animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes pulse {
+     0%, 100% { transform: scale(1); }
+     50% { transform: scale(1.15); }
+    }
+</style>

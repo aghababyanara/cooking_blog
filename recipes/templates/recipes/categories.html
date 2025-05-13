@@ -1,0 +1,75 @@
+{% extends "recipes/base.html" %}
+{% load static %}
+
+{% block title %}Recipe Categories - Cooking Blog{% endblock %}
+
+{% block meta_description %}Browse all recipe categories on Cooking Blog. Find your favorite cooking categories with delicious recipes.{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-12 text-center">
+        <h1 class="text-4xl font-bold text-orange-800 font-playfair mb-4">Recipe Categories</h1>
+        <p class="text-lg text-orange-600 max-w-2xl mx-auto">
+            Explore our collection of recipes organized by different categories. Find your next culinary inspiration!
+        </p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        {% for category in categories %}
+        <article class="group relative bg-white rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden border border-orange-50"
+                 itemscope itemtype="https://schema.org/CategoryCode">
+            <a href="{% url 'recipes:category-detail' category.slug %}" 
+               class="block h-full">
+                <div class="relative aspect-[4/3] bg-orange-50">
+                    {% if category.image %}
+                    <img src="{{ category.image.url }}" 
+                         alt="{{ category.name }} recipes" 
+                         class="w-full h-full object-cover"
+                         loading="lazy"
+                         width="400"
+                         height="300"
+                         itemprop="image">
+                    {% else %}
+                    <div class="w-full h-full flex items-center justify-center text-orange-200">
+                        <i class="fas fa-utensils fa-4x"></i>
+                    </div>
+                    {% endif %}
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                    <div class="absolute bottom-0 left-0 right-0 p-4">
+                        <h2 class="text-2xl font-bold text-white mb-2" itemprop="name">
+                            {{ category.name|title }}
+                        </h2>
+                    </div>
+                </div>
+
+                <div class="p-6">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center text-orange-700">
+                            <i class="fas fa-book-open mr-2"></i>
+                            <span class="font-medium" itemprop="numberOfItems">
+                                {{ category.recipe_count }} recipe{{ category.recipe_count|pluralize:"s" }}
+                            </span>
+                        </div>
+                        <span class="px-3 py-1 bg-orange-100 text-orange-700 text-sm rounded-full">
+                            {{ category.recipes.first.created_at|timesince }} ago
+                        </span>
+                    </div>
+                </div>
+            </a>
+        </article>
+        {% empty %}
+        <div class="col-span-full text-center py-16">
+            <div class="max-w-md mx-auto">
+                <i class="fas fa-folder-open fa-3x text-orange-200 mb-4"></i>
+                <h3 class="text-xl font-semibold text-orange-800 mb-2">No Categories Found</h3>
+                <p class="text-orange-600">Check back later for new recipe categories!</p>
+                <a href="{% url 'recipes:recipe-list' %}" 
+                   class="mt-4 inline-block px-6 py-2 bg-orange-600 text-white rounded-full hover:bg-orange-700 transition-colors">
+                    Browse All Recipes
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

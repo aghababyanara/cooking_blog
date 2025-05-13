@@ -1,0 +1,326 @@
+{% extends "recipes/base.html" %}
+{% load static %}
+
+{% block title %}{{ recipe.title }} - Cooking Blog{% endblock %}
+
+{% block meta_description %}{{ recipe.description|truncatechars:160 }}{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <nav class="mb-6">
+        <a href="{% url 'recipes:recipe-list' %}" 
+           class="inline-flex items-center text-orange-600 hover:text-orange-700 transition-colors">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Back to Recipes
+        </a>
+    </nav>
+
+    <header class="mb-8" itemscope itemtype="https://schema.org/Recipe">
+        <div class="flex items-center justify-between mb-4">
+            <h1 class="text-4xl font-bold text-orange-800 font-playfair" itemprop="name">{{ recipe.title }}</h1>
+
+        </div>
+
+        <div class="flex flex-wrap items-center gap-4 text-sm text-orange-700">
+            <div class="flex items-center">
+                <img src="{% if recipe.author.profile_picture and recipe.author.profile_picture.url %}{{ recipe.author.profile_picture.url }}{% else %}{% static 'images/default-profile.png' %}{% endif %}" 
+                     alt="{{ recipe.author.username }}" 
+                     class="w-8 h-8 rounded-full mr-2">
+                <span itemprop="author">{{ recipe.author.username }}</span>
+            </div>
+            <div class="flex items-center">
+                <i class="fas fa-clock mr-2"></i>
+                <time datetime="{{ recipe.created_at|date:'c' }}" itemprop="datePublished">
+                    {{ recipe.created_at|date:"F j, Y" }}
+                </time>
+            </div>
+            <div class="flex items-center" itemprop="totalTime">
+                <i class="fas fa-stopwatch mr-2"></i>
+                {{ recipe.cooking_time }}
+            </div>
+            {% if recipe.servings %}
+            <div class="flex items-center" itemprop="recipeYield">
+                <i class="fas fa-utensils mr-2"></i>
+                {{ recipe.servings }} servings
+            </div>
+            {% endif %}
+        </div>
+    </header>
+
+    <div class="grid lg:grid-cols-3 gap-8 mb-12">
+        <div class="lg:col-span-2">
+            <div class="relative rounded-xl overflow-hidden shadow-lg border-2 border-orange-100">
+                {% if recipe.image %}
+                <img src="{{ recipe.image.url }}" 
+                     alt="{{ recipe.title }}" 
+                     class="w-full h-96 object-cover"
+                     itemprop="image"
+                     loading="lazy">
+                {% else %}
+                <div class="h-96 bg-orange-50 flex items-center justify-center">
+                    <i class="fas fa-camera fa-3x text-orange-200"></i>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Quick Facts -->
+        <aside class="bg-orange-50 p-6 rounded-lg shadow-sm border border-orange-200">
+            <div class="space-y-4">
+                <div class="space-y-4">
+                    <div>
+                        <h3 class="text-sm font-semibold text-orange-800 mb-2">CATEGORY</h3>
+                        {% if recipe.category and recipe.category.slug %}
+                            <a href="{% url 'recipes:category-detail' recipe.category.slug %}" 
+                               class="text-orange-600 hover:text-orange-700">
+                                {{ recipe.category.name }}
+                            </a>
+                        {% else %}
+                            <span class="text-orange-600">No category assigned</span>
+                        {% endif %}
+                    </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-orange-800 mb-2">DIFFICULTY</h3>
+                    <div class="capitalize bg-orange-100 px-3 py-1 rounded-full text-sm inline-block">
+                        {{ recipe.difficulty }}
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-orange-800 mb-2">LAST UPDATED</h3>
+                    <time datetime="{{ recipe.updated_at|date:'c' }}">
+                        {{ recipe.updated_at|date:"M j, Y" }}
+                    </time>
+                </div>
+                <div id="favorite-section" class="mt-4">
+                    {% include 'recipes/favorite_button.html' %}
+                </div>
+                <a href="{% url 'recipes:favorites_list' %}" 
+                    class="mt-4 inline-flex items-center justify-center w-full bg-orange-100 hover:bg-orange-200 text-orange-700 px-4 py-2 rounded-lg transition-all duration-300 
+                        border border-orange-200 hover:border-orange-300 shadow-sm hover:shadow-md group">
+                    <i class="fas fa-heart mr-2 text-orange-600 group-hover:text-orange-700 transition-colors"></i>
+                    <span class="font-medium">View Favorites</span>
+                </a>
+            </div>
+        </aside>
+    </div>
+
+    {% if recipe.description %}
+    <div class="prose max-w-none mb-8 text-orange-800" itemprop="description">
+        {{ recipe.description }}
+    </div>
+    {% endif %}
+
+    <div class="grid md:grid-cols-2 gap-8 mb-12">
+        <section class="bg-orange-50 p-6 rounded-lg shadow-sm border border-orange-200">
+            <h2 class="text-2xl font-bold mb-4 text-orange-800" itemprop="recipeIngredient">Ingredients</h2>
+            <ul class="space-y-3">
+                {% for ingredient in recipe.ingredients.all %}
+                <li class="flex items-start text-orange-700">
+                    <span class="mr-2 mt-1">•</span>
+                    <span>
+                        {% if ingredient.quantity %}
+                        <span class="font-medium">{{ ingredient.quantity }}</span>
+                        {% endif %}
+                        {% if ingredient.unit %}
+                        <span class="text-sm text-orange-600">{{ ingredient.unit }}</span>
+                        {% endif %}
+                        {{ ingredient.name }}
+                    </span>
+                </li>
+                {% empty %}
+                <li class="text-orange-600">No ingredients listed</li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <section class="bg-orange-50 p-6 rounded-lg shadow-sm border border-orange-200">
+            <h2 class="text-2xl font-bold mb-4 text-orange-800" itemprop="recipeInstructions">Instructions</h2>
+            <ol class="space-y-4">
+                {% for instruction in recipe.instructions.all %}
+                <li class="text-orange-700">
+                    <div class="flex">
+                        <span class="flex-shrink-0 w-8 h-8 bg-orange-100 text-orange-800 rounded-full 
+                                   flex items-center justify-center mr-3">
+                            {{ instruction.step_number }}
+                        </span>
+                        <p class="leading-relaxed">
+                            {{ instruction.instruction_text }}
+                        </p>
+                    </div>
+                </li>
+                {% empty %}
+                <li class="text-orange-600">No instructions provided</li>
+                {% endfor %}
+            </ol>
+        </section>
+    </div>
+
+    <section id="reviews" class="mt-12" aria-label="Recipe reviews">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-orange-800">
+                Reviews ({{ recipe.total_comments }})
+                <span class="text-lg ml-2" aria-label="Average rating">
+                    {{ recipe.avg_rating|floatformat:1 }}★
+                </span>
+            </h2>
+
+
+            {% if user.is_authenticated %}
+                <div class="flex gap-2">
+                    {% if user_review %}
+                    <div class="flex gap-2" role="group" aria-label="Review actions">
+                        <a href="{% url 'recipes:review-edit' user_review.pk %}" 
+                        <a href="{% url 'recipes:review-edit' user_review.pk %}" 
+                           class="btn-orange flex items-center gap-1"
+                           aria-label="Edit review">
+                            <span class="icon icon--edit">✎</span>
+                            Adjust
+                        </a>
+                        <a href="{% url 'recipes:review-delete' user_review.pk %}" 
+                           class="btn-red flex items-center gap-1"
+                           aria-label="Delete review">
+                            <span class="icon icon--delete">🗑</span>
+                            Remove
+                        </a>
+                    </div>
+                    <a href="{% url 'recipes:review-create' recipe.slug %}" 
+                       class="btn-orange flex items-center gap-1"
+                       aria-label="Write a review">
+                        <span class="icon icon--review">👩🍳</span>
+                        Share Your Taste
+                    </a>
+                    {% else %}
+                    <a href="{% url 'recipes:review-create' recipe.slug %}" 
+                        class="btn-orange flex items-center gap-2 group"
+                        aria-label="Write a review">
+                        <span class="text-xl transition-transform group-hover:rotate-12">📝</span>
+                        <span class="relative">
+                            Share Your Taste
+                            <span class="absolute -bottom-1 left-0 w-0 h-[2px] bg-orange-600 
+                                        group-hover:w-full transition-all duration-300"></span>
+                        </span>
+                    </a>   
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    
+        <div class="space-y-6">
+            {% for review in recipe.reviews.all %}
+                <article class="review-card bg-white p-6 rounded-xl shadow-sm border border-orange-100 
+                              transition-transform hover:scale-[1.01]">
+                    <header class="flex items-center justify-between mb-4">
+                        <div class="flex items-center">
+                            <img src="{{ review.user.profile_picture.url|default:'images/default-profile.png' }}" 
+                                 alt="{{ review.user.username }}'s profile picture"
+                                 class="w-10 h-10 rounded-full mr-3 shadow-sm">
+                            <div>
+                                <p class="font-medium">{{ review.user.username }}</p>
+                                <time datetime="{{ review.created_at|date:'c' }}" 
+                                      class="text-sm text-gray-500">
+                                    {{ review.created_at|date:"d.m.Y H:i" }}
+                                </time>
+                            </div>
+                        </div>
+
+                    </header>
+                    {% if review.comment %}
+                        <div class="prose max-w-none text-gray-700 mb-4">
+                            {{ review.comment|linebreaks }}
+                        </div>
+                    {% endif %}
+                </article>
+            {% empty %}
+                <div class="text-center py-8 bg-orange-50 rounded-xl">
+                    <p class="text-gray-600 mb-4">No reviews yet. Be the first!</p>
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'recipes:review-create' recipe.slug %}" 
+                        class="btn-orange inline-flex items-center gap-2 
+                            group transition-all hover:gap-3 
+                            hover:-translate-y-0.5 hover:shadow-lg">
+                        <span class="relative flex items-center">
+                            <span class="text-xl transition-transform group-hover:rotate-12">📝</span>
+                            <span class="absolute -right-2 -top-2 opacity-0 group-hover:opacity-100 
+                                    transition-opacity duration-300">✨</span>
+                        </span>
+                        <span class="relative font-semibold">
+                            Share Your Taste
+                            <span class="absolute bottom-0 left-0 w-0 h-[2px] bg-amber-900 
+                                    group-hover:w-full transition-all duration-300"></span>
+                        </span>
+                    </a>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+    
+    {% if recommended_recipes %}
+    <section class="mt-16">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-orange-800">You Might Also Like</h2>
+            <a href="{% url 'recipes:category-detail' recipe.category.slug %}" 
+               class="text-orange-600 hover:text-orange-700">
+                View All in {{ recipe.category.name }} →
+            </a>
+        </div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {% for recipe in recommended_recipes %}
+            <article class="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow overflow-hidden">
+                <a href="{% url 'recipes:recipe-detail' recipe.slug %}" class="block">
+                    <div class="aspect-video bg-orange-50">
+                        {% if recipe.image %}
+                        <img src="{{ recipe.image.url }}" 
+                             alt="{{ recipe.title }}" 
+                             class="w-full h-full object-cover"
+                             loading="lazy">
+                        {% else %}
+                        <div class="w-full h-full flex items-center justify-center text-orange-200">
+                            <i class="fas fa-camera fa-2x"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-semibold text-orange-800 line-clamp-2 mb-2">{{ recipe.title }}</h3>
+                        <div class="flex items-center justify-between text-sm text-orange-700">
+                            <span>⏲ {{ recipe.cooking_time }}</span>
+                            <span class="capitalize bg-orange-100 px-2 py-1 rounded">{{ recipe.difficulty }}</span>
+                        </div>
+                    </div>
+                </a>
+            </article>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.body.addEventListener('htmx:afterSwap', function(evt) {
+        const hearts = document.querySelectorAll('.fa-heart');
+        hearts.forEach(heart => {
+            if (heart.closest('#favorite-section')) {
+                heart.classList.add('heart-animation');
+                setTimeout(() => heart.classList.remove('heart-animation'), 500);
+            }
+        });
+        
+
+    });
+});
+
+document.addEventListener('htmx:afterSwap', function(evt) {
+    if (evt.detail.target.id === 'favorite-section') {
+        const heart = document.querySelector('#favorite-section .fa-heart');
+        if (heart) {
+            heart.classList.add('animate-pulse');
+            setTimeout(() => heart.classList.remove('animate-pulse'), 500);
+        }
+    }
+});
+</script>
+{% endblock %}

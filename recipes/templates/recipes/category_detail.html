@@ -1,0 +1,146 @@
+{% extends "recipes/base.html" %}
+{% load static %}
+
+{% block title %}{{ category.name }} Recipes - Cooking Blog{% endblock %}
+{% block meta_description %}Explore all {{ category.name }} recipes on Cooking Blog. Find delicious cooking ideas and step-by-step instructions.{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Back Button -->
+    <nav class="mb-6">
+        <a href="{% url 'recipes:category-list' %}" 
+           class="inline-flex items-center text-orange-600 hover:text-orange-700 transition-colors">
+            <i class="fas fa-arrow-left mr-2"></i>
+            All Categories
+        </a>
+    </nav>
+
+    <!-- Category Header -->
+    <header class="mb-8 text-center" itemscope itemtype="https://schema.org/CategoryCode">
+        {% if category.image %}
+        <div class="relative h-64 rounded-xl overflow-hidden shadow-lg mb-6">
+            <img src="{{ category.image.url }}" 
+                 alt="{{ category.name }}" 
+                 class="w-full h-full object-cover"
+                 loading="lazy"
+                 itemprop="image">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/30"></div>
+        </div>
+        {% endif %}
+        
+        <h1 class="text-4xl font-bold text-orange-800 mb-2 font-playfair" itemprop="name">{{ category.name }}</h1>
+        <p class="text-orange-600 text-lg">
+            {{ page_obj.paginator.count }} recipe{{ page_obj.paginator.count|pluralize:"s" }} available
+        </p>
+    </header>
+
+    <!-- Recipes Grid -->
+    <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+        {% for recipe in page_obj %}
+        <article class="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow overflow-hidden" 
+                 itemscope 
+                 itemtype="https://schema.org/Recipe">
+            <a href="{% url 'recipes:recipe-detail' recipe.slug %}" class="block">
+                <div class="relative aspect-video bg-orange-50">
+                    {% if recipe.image %}
+                    <img src="{{ recipe.image.url }}" 
+                         alt="{{ recipe.title }}" 
+                         class="w-full h-full object-cover"
+                         loading="lazy"
+                         itemprop="image">
+                    {% else %}
+                    <div class="w-full h-full flex items-center justify-center text-orange-200">
+                        <i class="fas fa-camera fa-3x"></i>
+                    </div>
+                    {% endif %}
+                    <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60">
+                        <h2 class="text-xl font-bold text-white mb-2" itemprop="name">{{ recipe.title }}</h2>
+                    </div>
+                </div>
+
+                <div class="p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center text-sm text-orange-700">
+                            <i class="fas fa-clock mr-2"></i>
+                            <span itemprop="totalTime">{{ recipe.cooking_time }}</span>
+                        </div>
+                        <span class="capitalize bg-orange-100 px-3 py-1 rounded-full text-sm">
+                            {{ recipe.difficulty }}
+                        </span>
+                    </div>
+
+                    <div class="flex items-center justify-between text-sm text-orange-600">
+                        <div class="flex items-center">
+                            {% if recipe.author.profile_picture and recipe.author.profile_picture.url %}
+                                <img src="{{ recipe.author.profile_picture.url }}" 
+                                     alt="{{ recipe.author.username }}" 
+                                     class="w-6 h-6 rounded-full mr-2">
+                            {% else %}
+                                <img src="{% static 'images/default-profile.png' %}" 
+                                     alt="Default profile" 
+                                     class="w-6 h-6 rounded-full mr-2">
+                            {% endif %}
+                            <span itemprop="author">{{ recipe.author.username }}</span>
+                        </div>
+                        <time datetime="{{ recipe.created_at|date:'c' }}" itemprop="datePublished">
+                            {{ recipe.created_at|date:"M j, Y" }}
+                        </time>
+                    </div>
+                </div>
+            </a>
+        </article>
+        {% empty %}
+        <div class="col-span-full text-center py-16">
+            <div class="max-w-md mx-auto">
+                <i class="fas fa-utensils fa-3x text-orange-200 mb-4"></i>
+                <h3 class="text-xl font-semibold text-orange-800 mb-2">No Recipes Found</h3>
+                <p class="text-orange-600 mb-4">Be the first to add a recipe in this category!</p>
+                <a href="{% url 'recipes:recipe-list' %}" 
+                   class="inline-flex items-center px-6 py-2 bg-orange-600 text-white rounded-full hover:bg-orange-700 transition-colors">
+                    Browse All Recipes
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </section>
+
+    <!-- Pagination -->
+    {% if page_obj.paginator.num_pages > 1 %}
+    <nav class="mt-8 flex justify-center" aria-label="Pagination">
+        <ul class="inline-flex items-center space-x-1">
+            {% if page_obj.has_previous %}
+            <li>
+                <a href="?page={{ page_obj.previous_page_number }}" 
+                   class="px-4 py-2 text-orange-600 hover:bg-orange-100 rounded-full">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <li>
+                <span class="px-4 py-2 bg-orange-600 text-white rounded-full">{{ num }}</span>
+            </li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <li>
+                <a href="?page={{ num }}" 
+                   class="px-4 py-2 text-orange-600 hover:bg-orange-100 rounded-full">{{ num }}</a>
+            </li>
+            {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <li>
+                <a href="?page={{ page_obj.next_page_number }}" 
+                   class="px-4 py-2 text-orange-600 hover:bg-orange-100 rounded-full">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

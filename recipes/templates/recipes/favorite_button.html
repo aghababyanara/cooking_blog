@@ -1,0 +1,25 @@
+{% load static %}
+<div id="favorite-section" class="text-center">
+    {% if user.is_authenticated %}
+    <button 
+        hx-post="{% url 'recipes:toggle_favorite' recipe.slug %}"
+        hx-target="#favorite-section"
+        hx-swap="outerHTML"
+        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+        class="flex items-center justify-center space-x-2 w-full bg-orange-600 text-white py-2 rounded-full hover:bg-orange-700 transition-colors">
+        
+        {% if recipe in user.favorite_recipes.all %}
+            <i class="fas fa-heart text-xl"></i>
+            <span>Remove from Favorites</span>
+        {% else %}
+            <i class="far fa-heart text-xl"></i>
+            <span>Add to Favorites</span>
+        {% endif %}
+    </button>
+    {% else %}
+    <a href="{% url 'users:login' %}?next={{ request.path }}"
+       class="block w-full bg-orange-600 text-white py-2 rounded-full hover:bg-orange-700 transition-colors">
+        <i class="far fa-heart mr-2"></i>Login to Add
+    </a>
+    {% endif %}
+</div>

@@ -1,0 +1,215 @@
+{% extends "recipes/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <div class="bg-white rounded-xl shadow-lg p-8">
+        <h1 class="text-3xl font-bold text-orange-800 mb-6">Create new recipe</h1>
+        <form method="POST" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+            
+            <div class="error-container mb-6">
+                {% if form.non_field_errors %}
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                    {{ form.non_field_errors }}
+                </div>
+                {% endif %}
+                
+                {% if ingredient_formset.non_form_errors %}
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                    Error {{ ingredient_formset.non_form_errors }}
+                </div>
+                {% endif %}
+                
+                {% if instruction_formset.non_form_errors %}
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                    Error {{ instruction_formset.non_form_errors }}
+                </div>
+                {% endif %}
+            </div>
+
+            <div>
+                <label class="block text-orange-700 mb-2 text-lg">{{ form.title.label }}</label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                <div class="text-red-500 text-sm mt-1">{{ form.title.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div>
+                <label class="block text-orange-700 mb-2 text-lg">{{ form.description.label }}</label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                <div class="text-red-500 text-sm mt-1">{{ form.description.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-orange-700 mb-2 text-lg">{{ form.cooking_time.label }}</label>
+                    {{ form.cooking_time }}
+                    {% if form.cooking_time.errors %}
+                    <div class="text-red-500 text-sm mt-1">{{ form.cooking_time.errors }}</div>
+                    {% endif %}
+                </div>
+                <div>
+                    <label class="block text-orange-700 mb-2 text-lg">{{ form.servings.label }}</label>
+                    {{ form.servings }}
+                    {% if form.servings.errors %}
+                    <div class="text-red-500 text-sm mt-1">{{ form.servings.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="border-t-2 border-orange-100 pt-6">
+                <h3 class="text-xl font-bold text-orange-800 mb-4">Ingredients</h3>
+                <div id="ingredients-formset" class="space-y-4">
+                    {{ ingredient_formset.management_form }}
+                    {% for form in ingredient_formset %}
+                    <div class="ingredient-form flex gap-4 items-end border-b-2 border-orange-100 pb-4">
+                        {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+                        
+                        <div class="flex-1">
+                            <label class="block text-orange-700 mb-1">{{ form.name.label }}</label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ form.name.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="flex-1">
+                            <label class="block text-orange-700 mb-1">{{ form.quantity.label }}</label>
+                            {{ form.quantity }}
+                            {% if form.quantity.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ form.quantity.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="flex-1">
+                            <label class="block text-orange-700 mb-1">{{ form.unit.label }}</label>
+                            {{ form.unit }}
+                            {% if form.unit.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ form.unit.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <button type="button" onclick="addIngredientForm()" 
+                        class="mt-4 text-orange-600 hover:text-orange-800 font-medium">
+                    <i class="fas fa-plus mr-2"></i>Add ingredient
+                </button>
+            </div>
+
+            <div class="border-t-2 border-orange-100 pt-6">
+                <h3 class="text-xl font-bold text-orange-800 mb-4">Instructions</h3>
+                <div id="instructions-formset" class="space-y-4">
+                    {{ instruction_formset.management_form }}
+                    {% for form in instruction_formset %}
+                    <div class="instruction-form border-b-2 border-orange-100 pb-4">
+                        {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+                        
+                        <div class="flex items-center mb-2">
+                            <span class="text-orange-700 font-medium mr-2">Step {{ forloop.counter }}</span>
+                        </div>
+                        
+                        {{ form.instruction_text }}
+                        {% if form.instruction_text.errors %}
+                        <div class="text-red-500 text-sm mt-1">{{ form.instruction_text.errors }}</div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                <button type="button" onclick="addInstructionForm()" 
+                        class="mt-4 text-orange-600 hover:text-orange-800 font-medium">
+                    <i class="fas fa-plus mr-2"></i>Add step
+                </button>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-orange-700 mb-2 text-lg">{{ form.difficulty.label }}</label>
+                    {{ form.difficulty }}
+                    {% if form.difficulty.errors %}
+                    <div class="text-red-500 text-sm mt-1">{{ form.difficulty.errors }}</div>
+                    {% endif %}
+                </div>
+                <div>
+                    <label class="block text-orange-700 mb-2 text-lg">{{ form.category.label }}</label>
+                    {{ form.category }}
+                    {% if form.category.errors %}
+                    <div class="text-red-500 text-sm mt-1">{{ form.category.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-orange-700 mb-2 text-lg">{{ form.image.label }}</label>
+                {{ form.image }}
+                {% if form.image.errors %}
+                <div class="text-red-500 text-sm mt-1">{{ form.image.errors }}</div>
+                {% endif %}
+            </div>
+
+            <button type="submit" 
+                    class="w-full bg-orange-600 text-white py-3 px-6 rounded-lg hover:bg-orange-700 transition-colors text-lg font-bold">
+                Create recipe
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        window.ingredientTotal = document.getElementById('id_ingredients-TOTAL_FORMS');
+        window.ingredientIndex = parseInt(ingredientTotal.value) || 0;
+        
+        window.instructionTotal = document.getElementById('id_instructions-TOTAL_FORMS');
+        window.instructionIndex = parseInt(instructionTotal.value) || 0;
+    });
+
+    function updateFormIndices(formElement, prefix) {
+        const newIndex = window[`${prefix}Index`];
+        const regex = new RegExp(`${prefix}-(\\d+)-`, 'g');
+        
+        formElement.querySelectorAll('[name], [id]').forEach(element => {
+            if (element.name) element.name = element.name.replace(regex, `${prefix}-${newIndex}-`);
+            if (element.id) element.id = element.id.replace(regex, `${prefix}-${newIndex}-`);
+        });
+    }
+
+    function addIngredientForm() {
+        const forms = document.querySelectorAll('.ingredient-form');
+        const template = forms[forms.length - 1].cloneNode(true);
+        
+        template.querySelectorAll('input').forEach(input => {
+            input.value = '';
+            input.classList.remove('border-red-500');
+        });
+        template.querySelectorAll('.text-red-500').forEach(error => error.remove());
+        
+        updateFormIndices(template, 'ingredients');
+        document.getElementById('ingredients-formset').appendChild(template);
+        window.ingredientTotal.value = ++window.ingredientIndex;
+    }
+
+    function addInstructionForm() {
+        const forms = document.querySelectorAll('.instruction-form');
+        const template = forms[forms.length - 1].cloneNode(true);
+        
+        template.querySelector('textarea').value = '';
+        template.querySelectorAll('.text-red-500').forEach(error => error.remove());
+        
+        template.querySelectorAll('input[type="hidden"]').forEach(input => input.remove());
+        
+        updateFormIndices(template, 'instructions');
+        document.getElementById('instructions-formset').appendChild(template);
+        window.instructionTotal.value = ++window.instructionIndex;
+        
+        const steps = document.querySelectorAll('.instruction-form span');
+        steps.forEach((span, index) => {
+            span.textContent = `Step ${index + 1}`;
+        });
+    }
+</script>
+{% endblock %}
